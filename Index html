@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mori's World</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Rubik+Distressed&family=Rock+Salt&family=Special+Elite&display=swap" rel="stylesheet">
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #dedede;
+  color: #171717;
+  font-family: 'Patrick Hand', cursive;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 15px;
+  overflow-x: hidden;
+}
+
+/* Paper texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 24px,
+      rgba(0,0,0,0.035) 25px
+    ),
+    radial-gradient(#555 0.5px, transparent 0.5px);
+  background-size: auto, 8px 8px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* Main scrapbook sheet */
+.scrapbook {
+  width: 850px;
+  max-width: 100%;
+  background: #f7f7f7;
+  padding: 65px 45px 55px;
+  position: relative;
+  box-shadow:
+    3px 4px 0 #bbb,
+    10px 12px 0 #777,
+    15px 18px 25px rgba(0,0,0,0.18);
+  transform: rotate(-0.5deg);
+  animation: appear 0.7s ease-out both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(25px) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-0.5deg);
+  }
+}
+
+/* Decorative tape on scrapbook */
+.scrapbook::before,
+.scrapbook::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 28px;
+  background: rgba(130,130,130,0.4);
+  border-left: 2px dashed rgba(255,255,255,0.5);
+  border-right: 2px dashed rgba(255,255,255,0.5);
+}
+
+.scrapbook::before {
+  top: -13px;
+  left: 30px;
+  transform: rotate(-15deg);
+}
+
+.scrapbook::after {
+  bottom: -13px;
+  right: 35px;
+  transform: rotate(-12deg);
+}
+
+/* Title */
+.heading {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.small-title {
+  font: 12px 'DM Mono', monospace;
+  letter-spacing: 3px;
+}
+
+h1 {
+  font-family: 'Rock Salt', cursive;
+  font-size: clamp(34px, 6vw, 57px);
+  margin: 16px 0 10px;
+  line-height: 1.1;
+  transform: rotate(-2deg);
+}
+
+.subtitle {
+  font-size: 20px;
+  margin: 0;
+}
+
+/* Three paper cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: center;
+}
+
+.paper-card {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  background: #fff;
+  border: 0;
+  color: #171717;
+  font-family: 'Rubik Distressed', cursive;
+  padding: 15px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  box-shadow: 4px 6px 0 #aaa;
+  clip-path: polygon(
+    0% 2%, 8% 0%, 16% 2%, 24% 0%,
+    32% 2%, 40% 0%, 48% 2%, 56% 0%,
+    64% 2%, 72% 0%, 80% 2%, 88% 0%,
+    96% 2%, 100% 0%,
+    98% 12%, 100% 24%, 98% 36%,
+    100% 48%, 98% 60%, 100% 72%,
+    98% 84%, 100% 96%,
+    88% 98%, 76% 100%, 64% 98%,
+    52% 100%, 40% 98%, 28% 100%,
+    16% 98%, 4% 100%,
+    2% 88%, 0% 76%, 2% 64%,
+    0% 52%, 2% 40%, 0% 28%,
+    2% 16%
+  );
+  transition: filter 0.2s, scale 0.2s;
+}
+
+.paper-card:nth-child(1) {
+  transform: rotate(-4deg);
+}
+
+.paper-card:nth-child(2) {
+  transform: rotate(3deg);
+}
+
+.paper-card:nth-child(3) {
+  transform: rotate(-2deg);
+}
+
+.paper-card:hover:not(:disabled) {
+  scale: 1.06;
+  filter: brightness(0.95);
+}
+
+.paper-card:active:not(:disabled) {
+  scale: 0.98;
+}
+
+.card-icon {
+  font-size: 43px;
+  line-height: 1;
+}
+
+.card-name {
+  font-family: 'Rubik Distressed', cursive;
+  font-size: 19px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Small tape strips */
+.paper-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 30%;
+  width: 40%;
+  height: 18px;
+  background: rgba(120,120,120,0.3);
+  transform: rotate(-6deg);
+}
+
+/* Loading dots */
+.loading-dots {
+  display: none;
+  gap: 6px;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: #111;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  to {
+    transform: translateY(-8px);
+    opacity: 0.3;
+  }
+}
+
+.paper-card.loading .loading-dots {
+  display: flex;
+}
+
+.paper-card.loading .card-icon {
+  display: none;
+}
+
+/* Locked mystery card */
+.locked {
+  background: #d2d2d2;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* Construction tape */
+.construction-tape {
+  position: absolute;
+  top: 50%;
+  left: -25%;
+  width: 150%;
+  transform: translateY(-50%) rotate(-24deg);
+  background: repeating-linear-gradient(
+    90deg,
+    #111 0,
+    #111 15px,
+    #fff 15px,
+    #fff 30px
+  );
+  padding: 7px 0;
+}
+
+.construction-tape span {
+  display: inline-block;
+  background: #111;
+  color: white;
+  padding: 6px 10px;
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: 1px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 50px;
+  font: 12px 'DM Mono', monospace;
+  color: #777;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .scrapbook {
+    padding: 55px 15px 40px;
+  }
+
+  .cards {
+    gap: 8px;
+  }
+
+  .paper-card {
+    padding: 6px;
+    gap: 7px;
+  }
+
+  .card-icon {
+    font-size: 25px;
+  }
+
+  .card-name {
+    font-size: 11px;
+  }
+
+  .construction-tape span {
+    font-size: 6px;
+    padding: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="scrapbook">
+
+  <div class="heading">
+    <div class="small-title">✦ CHOOSE UR WEAPON ✦</div>
+    <h1>MORI'S WORLD</h1>
+    <p class="subtitle">still choosing?</p>
+  </div>
+
+  <div class="cards">
+
+    <!-- MORE WITH MORI -->
+    <button class="paper-card" onclick="openPage(this, '')">
+      <span class="card-icon">✧</span>
+      <span class="card-name">MOVIES WITH MORI</span>
+      <span class="loading-dots">
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+
+    <!-- MOVIES WITH MORI -->
+   
+
+<button class="paper-card" onclick="openPage(this, 'https://nikithakv2025-art.github.io/Momento-Mori/')">
+  <span class="card-icon">✦</span>
+  <span class="card-name">MORE WITH MORI</span>
+  <span class="loading-dots">
+    <span></span><span></span><span></span>
+  </span>
+</button>
+
+
+
+    <!-- LOCKED THIRD CARD -->
+    <button class="paper-card locked" disabled>
+      <span class="card-icon">?</span>
+      <span class="card-name">???</span>
+      <span class="construction-tape">
+        <span>UNDER CONSTRUCTION</span>
+      </span>
+    </button>
+
+  </div>
+
+  <div class="footer">
+    © MORI 2026 — MORE COMING SOON
+  </div>
+
+</main>
+
+
+<script>
+let navigating = false;
+
+function openPage(button, url) {
+  if (navigating) return;
+
+  navigating = true;
+  button.classList.add("loading");
+
+  document.querySelectorAll(".paper-card:not(.locked)")
+    .forEach(btn => btn.disabled = true);
+
+  setTimeout(function() {
+    window.location.assign(url);
+  }, 1500);
+}
+</script>
+
+
+</body>
+</html>
